@@ -1,0 +1,28 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: 'buster'
+
+inputs:
+- name: debproxy
+  path: .
+
+outputs:
+- name: output
+
+run:
+  path: sh
+  args:
+  - -ec
+  - |
+    # apt-get update && apt-get install -y dpkg-dev devscripts
+    mkdir pkg
+    mkdir -pv pkg/DEBIAN
+    mkdir -pv pkg/usr/bin
+    cp ci/control pkg/DEBIAN/control
+    go build -v -o output/debproxy *.go
+    cp output/debproxy pkg/usr/bin/debproxy
+    dpkg-deb --build pkg ./output
